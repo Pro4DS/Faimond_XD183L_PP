@@ -1,0 +1,58 @@
+1 (--- powered by PRO4 DENTAL ---)
+1 °M30
+0 ( )                 : Kommentar: 0=nein,1=ja,2=mit Satznummer
+0 S                   : Drehzahlkennung
+1                     : Format der Koordinaten: 1=mm,2=1/100,3=1/1000
+0                     : Komprimierter Modus: 0=nein,1=ja
+0                     : Max Satznr: 0=na,1=neue Datei,2=selbe Datei
+1 1                   : Nr des 1. Satzes: 0=keine Satznr
+1 1                   : Inkrementierung der Satznummer
+0 M03                 : Startkennung: 0=nein,1=ja
+0 M30                 : Stopkennung: 0=nein,1=ja
+1 °G00 30000          : Eilgang: 1=erster Satz im Vorschub,2=im Eilgang
+1 °G01                : Vorschubgeschwindigkeit: 2=F.. nur im ersten Satz
+1                     : Referenz: 0=Mittelp,1=Umfang
+0                     : Zahl der Zeilen zur freien Verfuegg (max 20x75)
+1 .nc                 : Extension des Fraesprogramms: 0='.blc'
+0 *                   : Zeilenendekennung: 0=nein,1=ja
+0                     : Max Zeichenzahl: 0=na,1=neue Datei
+0                     : Max Fraesbahnlaenge in m: 0=na,1=neue,2=selbe Datei
+0                     : Zeilenabstand zwischen numerierten Saetzen: 0=na
+0                     : Format des ersten Satzes: 0=xyz,1=nur z
+1 XYZ                 : Koordinatensystem auf der Maschine: 0=na
+0                     : Zahl der Zeilen zur freien Verfuegung in 1. Datei
+0                     : Aufteilen der Dateien in waagrechte Scheiben
+0                     : relativ: 0=absolut,1=relativ
+0                     : Zeile fuer Geschwindigkeitsaenderung Eilgang->Vorschub
+0                     : Zeile fuer Geschwindigkeitsaenderung Vorschub->Eilgang
+0                     : Kommentare
+1 °X °Y °Z            : Name der Achsen: 0=na
+1 0 1 °F              : Geschwindigkeiten als reelle Zahlen: 0=na
+0                     : Rotation der Werkzeugachse: 0=na
+0 G40 G41 G42         : Werkzeugkorrektur: 0=na
+0 50 H~e~g~h~i~j~kM13 : zusaetzlicher Satz
+#34  H~e~g~h~i~j~kM13 : zusaetzlicher Satz
+#35  H~e~g~h~i~j~kM13 : zusaetzlicher Satz
+#40                   : Zeilenendekennung in Zeilen mit Werkzeugbewegung
+#41 1                 : 1= Ausgabe in mm 2= Ausgabe in Zoll
+#44 1
+#45 0
+#48 1
+#58 °
+#61
+:#65 0.005 1           : smooth distance
+#84 2
+WinkelA ~0
+WinkelC ~2
+#83 $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_wzw.pro4 2
+#85 $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_ende.pro4 2
+#89 $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_start.pro4 1
+#94 $WNC_MACHINE_DEF\PRO4-FAIMOND-XD183.mac\data
+#95 °A~0°C~2
+:#96 0.001 0.001 0.001
+#100 2
+:#103 0.02               :circular smoothing
+:#115 0.02               :smoothing tolerance
+#117
+
+@PRO4 DENTAL GmbH

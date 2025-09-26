@@ -1,0 +1,197 @@
+################################################
+#  Postprocessor by PRO4 DENTAL for FAIMOND XD183
+################################################
+#  File:  GENINFO-WZW
+################################################
+#
+IF &NUMERO 
+ELSE
+	SET &NUMERO = $NUMERO
+ENDIF
+SET OUTIL_COURANT = &NUMERO
+#
+INCLUDE = $WNCZONE\WNCD_VARS.txt
+INCLUDE = $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_settings.pro4
+#
+##############################################
+######### Retract Management #################
+##############################################
+#
+# Build some Parameters
+#
+SETEVAL &T_ToolType = T&TP_CPPNUM
+SETEVAL &S_Spindle = S&TP_SPINDLE/.0/
+SETEVAL &D_ToolType = D&TP_CPPNUM
+SETEVAL &A_ANGLE_A = A$WINKELA
+SETEVAL &C_ANGLE_C = C$WINKELC
+SETEVAL $ANGLE_A = $WINKELA
+SETEVAL $ANGLE_C = $WINKELC
+#
+##############################################
+# ...if a tool change is needed 
+#
+	IF &TP_CPPNUM != $OLDTOOL
+# ( --- NEW TOOL --- )
+# (--- Activate Machine Origin ---)
+ $ORIGIN_MACHINE
+# (--- TOOL COMPENSATION OFF ---)
+ D0
+# (--- Move SafePos ---)
+ G00 Z$Safe_Z
+ G00 Y$Safe_Y
+ G00 X$Safe_X
+ G00 A$Safe_A
+ G00 C$Safe_C
+# (--- Set Spindle RPM ---)
+ &S_Spindle
+# (--- COOLANT OFF ---)
+ M09
+# (--- Get/Check Tool ---)
+ &T_ToolType M6
+ G91 Z0.01 F8000
+# (--- Spindle ON ---)
+ &S_Spindle M3 $COOLANT
+# (--- Activate Work Origin / ToolCompensation ---)
+ $ORIGIN_DISC &D_ToolType
+# (--- Coolant ON ---)
+ $COOLANT
+# (--- Wait to reach RPM ---)
+ G04 3
+ G00 &A_ANGLE_A
+ G00 &C_ANGLE_C
+ G00 ~"21"
+ G00 ~"20"
+ G01 ~"22" F1000
+	ELSE	
+#
+# ...if a the Angle of the A-Axis has been changed
+#	
+		IF $ANGLE_A != $OLDANGLE_A
+ ( --- NEW A-ANGLE --- )
+ (--- Activate Machine Origin ---)
+ $ORIGIN_MACHINE
+ (--- TOOL COMPENSATION OFF ---)
+ D0
+ (--- Move SafePos ---)
+ G00 Z$Safe_Z
+ G00 Y$Safe_Y
+ G00 X$Safe_X
+ G00 A$Safe_A
+ G00 C$Safe_C
+ (--- Set Spindle RPM ---)
+ &S_Spindle
+ (--- Activate Work Origin / ToolCompensation ---)
+ $ORIGIN_DISC &D_ToolType
+ (--- Coolant ON ---)
+ $COOLANT
+ G00 &A_ANGLE_A
+ G00 &C_ANGLE_C
+ G00~"21"
+ G00~"20"
+ G01 ~"22" F1000
+	ELSE
+#
+# ...if a the Angle of the C-Axis has been changed
+#	
+			IF $ANGLE_C != $OLDANGLE_C
+ ( --- NEW B-ANGLE --- )
+ (--- Activate Machine Origin ---)
+ $ORIGIN_MACHINE
+ (--- TOOL COMPENSATION OFF ---)
+ D0
+ (--- Move SafePos ---)
+ G00 Z$Safe_Z
+ G00 Y$Safe_Y
+ G00 X$Safe_X
+ G00 A$Safe_A
+ G00 C$Safe_C
+ (--- Set Spindle RPM ---)
+ &S_Spindle
+  (--- Activate Work Origin / ToolCompensation ---)
+ $ORIGIN_DISC &D_ToolType
+ (--- Coolant ON ---)
+ $COOLANT
+ G00 &A_ANGLE_A
+ G00 &C_ANGLE_C
+ G00~"21"
+ G00~"20"
+ G01 ~"22" F1000
+			ELSE
+#
+# ...if  A/C angles and tool are the same
+#	
+ ( --- SAME DIRECTION + TOOL --- )			
+ (--- Activate Machine Origin ---)
+ $ORIGIN_MACHINE
+ (--- TOOL COMPENSATION OFF ---)
+ D0
+ (--- Move Safe_Z ---)
+ G00 Z$Safe_Z
+ (--- Set Spindle RPM ---)
+ &S_Spindle
+ (--- Activate Work Origin / ToolCompensation ---)
+ $ORIGIN_DISC &D_ToolType
+ (--- Coolant ON ---)
+ $COOLANT
+ G00~"20"~"21"
+ G01 ~"22" F1000
+			ENDIF
+		ENDIF
+ENDIF
+#
+################################################
+##### TOOLPATH HEADER ##########################
+################################################
+#
+ ( ------------------------------ )
+ ( TOOLPATH &TP_NUM )
+ ( ------------------------------ )
+#
+# Write Tool Infos
+#
+IF &TP_BRAD == &TP_CRAD
+ ( Ball D&TP_CDIAM/.3/ L&TP_CCTOOLLENGTH/.3/ )
+ ( ToolType: &TP_CPPNUM )
+ ( Strategy: &TP_TYPE )
+ ( StockAllowance: &TP_STOCK/.3/ )
+ ( Step: &TP_STEP/.3/ )
+ ( Z-Step: &TP_DZSTEP/.3/ )
+ELSE
+	IF &TP_CRAD > 0
+ ( Torus D&TP_CDIAM/.3/ ER&TP_CRAD/.3/L&TP_CCTOOLLENGTH/.3/ )
+ ( ToolType: &TP_CPPNUM )
+ ( Strategy: &TP_TYPE )
+ ( StockAllowance: &TP_STOCK/.3/ )
+ ( Step: &TP_STEP/.3/ )
+ ( Z-Step: &TP_DZSTEP/.3/ )
+	ELSE
+ ( Flat D&TP_CDIAM/.3/ L&TP_CCTOOLLENGTH/.3/ )
+ ( ToolType: &TP_CPPNUM )
+ ( Strategy: &TP_TYPE )
+ ( StockAllowance: &TP_STOCK/.3/ )
+ ( Step: &TP_STEP/.3/ )
+ ( Z-Step: &TP_DZSTEP/.3/ )
+	ENDIF
+ENDIF
+#
+# Write the calculated Feedrates
+#
+IF $FEED_MANAGEMENT_ACTIVE=="1"
+ ( ------------------------------ )
+ ( FEED RATES )
+ ( @FAPP = $FAPP )
+ ( @FCUT = $FCUT )
+ ( @FRAP = $FRAP )
+ ( ------------------------------ )
+ELSE
+ (--- FEED MANAGEMENT DEACTIVATED ---)
+ENDIF
+#
+###############################################
+# START TOOLPATH
+##############################################
+#
+# Start the Calculated Toolpath
+#
+( --- START TOOLPATH --- )
+#

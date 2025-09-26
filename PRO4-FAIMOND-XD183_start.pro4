@@ -1,0 +1,156 @@
+################################################
+#  Postprocessor by PRO4 DENTAL for FAIMOND XD183
+################################################
+#  File:  GENINFO-START
+#################################################
+#
+IF &NUMERO 
+ELSE
+	SET &NUMERO = $NUMERO
+ENDIF
+SET OUTIL_COURANT = &NUMERO
+#
+INCLUDE = $WNCZONE\WNCD_VARS.txt
+INCLUDE = $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_settings.pro4
+#
+####################################################
+#
+SETEVAL $OLDTOOL = 0
+SETEVAL $OLDANGLE_A = 0
+SETEVAL $OLDANGLE_C = 0
+SETEVAL $STARTPP = 1
+#
+############################################
+# FIND LAST TOOLPATH WHICH IS NOT EMPTY
+############################################
+#
+STRTAB [ ] &PPModus = $POSPRO_MODE
+#
+IF &PPModus(,99) == 1
+      STRTAB list = &BA_03
+            DO &elem IN &list
+            SETEVAL &LEEREFRAESBAHN = 0
+            SET OUTIL_COURANT = &elem
+            STRTAB [ ] &JO_CALOUTIL_LISTE = &JO_CALOUTIL
+            SETEVAL &JO_CALOUTIL_1 = &JO_CALOUTIL_LISTE(,1)
+#
+# Checking if or not the toolpath is empty
+#
+            STRTAB [-] &TP_EMPTY_TOOLPATH_LIST = &TP_EMPTY_TOOLPATH
+            SETEVAL &EMPTY_TP = &TP_EMPTY_TOOLPATH_LIST(,99)
+                  IF &EMPTY_TP == 1
+                  SETEVAL &LEEREFRAESBAHN = 1
+                  ENDIF 
+#
+# If the toolpath is not empty, set the last toolpath number
+#
+                  IF &LEEREFRAESBAHN == 0
+                  SETEVAL $LAST_TOOLPATH = &elem
+                  ENDIF
+            ENDDO
+      SET OUTIL_COURANT = &NUMERO
+      ELSE
+            SETEVAL $LAST_TOOLPATH = &NUMERO
+      ENDIF
+#####################################################
+# Write NC File Header with General Informations
+######################################################
+#
+# CALL THE PALLET NUMBER FROM WORKNC 
+#
+IF $MACHINE_WITH_LOADER == 1
+(&WNCD_STK_0_PALLET)
+ENDIF
+#  SET DEFAULT ENTRY WHEN PALLET MANAGEMENT IS DONE BY JOB MANAGER 
+IF $MACHINE_WITH_LOADER == 2
+(BLOCK=00)
+ENDIF
+#
+# 
+(--- PROJECT: &WNCD_PRJ_ID ---)
+(--- USER: &WNCD_PRJ_LAST_USER_TO_EDIT ---)
+(--- DATE: &WNCD_PRJ_TIME ---)
+(--- MACHINE: &WNCD_MACH_NAME ---)
+(--- FIXTURE: &WNCD_CLAMPING_NAME ---)
+(--- POSITION: &WNCD_STK_POSITION_NAME ---)
+(--- STOCK NAME: &WNCD_PARTIAL_STK_INC ---)
+#
+#
+	SWITCH 	&WNCD_STK_MATERIAL
+		CASE "Cobalt Chrome"
+		ORCASE "CrCo"
+(--- Material: Cobalt-Chrome ---)
+(--- Thickness: &WNCD_STK_THICKNESS/.0/mm ---)
+		CASE "Glass Ceramic"
+			IF &WNCD_STK_0_TYPE == "Cuboid bar"
+(--- Material: GL-CERAMIC Bloc ---)
+			ELSE
+(--- Material: GL-CERAMIC - Disc ---)
+(--- Thickness: &WNCD_STK_THICKNESS/.0/mm ---)
+			ENDIF
+		CASE "Titanium"
+			IF &WNCD_STK_0_TYPE == "Pre-milled bar"
+(--- Material: PREMILL ---)
+(--- Diameter: &WNCD_STK_THICKNESS/.0/mm ---)
+			ELSE
+(--- Material: Titanium ---)
+(--- Thickness: &WNCD_STK_THICKNESS/.0/mm ---)
+			ENDIF
+		NOCASE
+(--- Material: &WNCD_STK_MATERIAL ---)
+(--- Thickness: &WNCD_STK_THICKNESS/.0/mm ---)
+	ENDSWITCH
+#
+#
+#
+#
+(--- TOOL MAGAZINE ID $TOOL_MAGAZINE ---)
+(--- LIST OF TOOLS ---)
+   STRTAB list = &BA_03
+      DO &elem IN &list
+      SETEVAL OUTIL_COURANT = &elem
+         IF &cppnum_list
+         SETEVAL &cppnum_found = 0
+            DO &toolnum IN &cppnum_list
+               IF &toolnum == &TP_CPPNUM
+               SETEVAL &cppnum_found = 1
+               ENDIF
+            ENDDO
+            IF &cppnum_found == 0
+            MERGE &cppnum_list = &TP_CPPNUM
+            MERGE &used_tp_list = &elem
+            ENDIF
+         UNSET &cppnum_found
+         ELSE
+            IF 0 != &TP_CPPNUM
+            MERGE &cppnum_list = &TP_CPPNUM
+            MERGE &used_tp_list = &elem
+            ENDIF
+         ENDIF
+      ENDDO
+   STRTAB [ ] &list_toolnb = &used_tp_list
+      DO &elem IN &list_toolnb 
+      SETEVAL OUTIL_COURANT = &elem
+			IF &TP_BRAD == &TP_CRAD
+(T&TP_CPPNUM - Ball D&TP_CDIAM/.1/mm )
+			ELSE
+				IF &TP_CRAD > 0
+(T&TP_CPPNUM - Torus D&TP_CDIAM/.1/mm CR&TP_CRAD/.2/mm )
+				ELSE
+(T&TP_CPPNUM - Flat D&TP_CDIAM/.1/mm )
+				ENDIF 
+			ENDIF
+      ENDDO
+(--- END List of Tools ---)
+#
+#
+#(------------------------------ )
+#( PROJECT: &WNCD_PRJ_ID )
+#( USER: &WNCD_PRJ_LAST_USER_TO_EDIT )
+#( DATE: &WNCD_PRJ_TIME )
+#( STOCK-ID: &WNCD_PARTIAL_STK_INC ---)
+#(------------------------------ )
+#
+####################################################
+#
+#

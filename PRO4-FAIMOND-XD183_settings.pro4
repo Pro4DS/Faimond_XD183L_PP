@@ -1,0 +1,160 @@
+################################################
+#  Postprocessor by PRO4 DENTAL for Redon BestMill
+################################################
+#  File:  GENINFO-SETTINGS
+#################################################
+#
+IF &NUMERO 
+ELSE
+	SET &NUMERO = $NUMERO
+ENDIF
+SET OUTIL_COURANT = &NUMERO
+#
+IF $POSPRO_MODE == 1
+	SETEVAL batch_courant = $BATCHNUM
+ENDIF
+#
+INCLUDE = $WNCZONE\WNCD_VARS.txt
+#
+##################################################
+##### MACHINE HAS A LOADER 
+##################################################
+#  0= No Loader      1=with Loader    2=Pallet managed in JobManager
+SETEVAL $MACHINE_WITH_LOADER = 2
+#
+##################################################
+###### SAFE POSITIONS 
+##################################################
+# IMPORTANT
+# Before SafePos must be always the Machine Origin activated 
+#
+SETEVAL $SAFE_X = "35"
+SETEVAL $SAFE_Y = "65"
+SETEVAL $SAFE_Z = "0"
+SETEVAL $SAFE_A = "0"
+SETEVAL $SAFE_B = "0"
+##################################################
+##### HOME POSITION
+##################################################
+SETEVAL $HOME_X = "not used"
+SETEVAL $HOME_Y = "not used"
+SETEVAL $HOME_Z = "not used"
+SETEVAL $HOME_A = "not used"
+SETEVAL $HOME_B = "not used"
+##################################################
+##### ORIGINS - G53, G54,...
+##################################################
+SETEVAL $ORIGIN_MACHINE = "G90 G53"
+SETEVAL $ORIGIN_DISC = "G90 G54"
+##################################################
+######    FEED MANAGEMENT    #####################
+##################################################
+#
+# Activate the FeedManagement
+#
+SETEVAL $FEED_MANAGEMENT_ACTIVE = "0"
+#
+# FeedScalefactor based on MaterialID and MaterialDesignation 
+#
+SWITCH &WNCD_STK_0_MATERIAL_DESIGNATION
+	CASE "Dental Direkt"
+	ORCASE "DD"	
+	SET &FEEDSCALE = 1.00
+	NOCASE
+		SWITCH &WNCD_STK_0_MATERIAL_ID
+			CASE "1"
+				SET &FEEDSCALE = 0.70
+			CASE "2"
+				SET &FEEDSCALE = 0.80
+			NOCASE
+				SET &FEEDSCALE = 0.75
+		ENDSWITCH	
+ENDSWITCH		
+#
+# Calculate the Feed rates to use
+# 
+SETOPER &FCUT = &TP_FRCUT * &FEEDSCALE
+SETOPER &FAPP = &TP_FRAPPROACH * &FEEDSCALE
+SETOPER &FRAP = &TP_FRRAPID
+# 
+# Store it in global Parameters
+#
+SETEVAL $FCUT = &FCUT/.0/
+SETEVAL $FAPP = &FAPP/.0/
+SETEVAL $FRAP = &FRAP/.0/
+#
+###############################################
+### COOLANT MANAGEMENT ########################
+###############################################
+#
+# switch cooolant mode by material
+# M12 = Air
+# M08 = Water 
+# M16 = Air + Suction
+#
+	SWITCH &WNCD_STK_MATERIAL
+		CASE "Zirconia"
+			SETEVAL &coolant = "M16"
+		CASE "Wax"
+			SETEVAL &coolant = "M08"
+		CASE "Plastic"
+			SETEVAL &coolant = "M08"
+		CASE "Peek"
+			SETEVAL &coolant = "M08"
+		CASE "Gold"
+			SETEVAL &coolant = "M08"
+		CASE "Cobalt Chrome"
+		ORCASE "CrCo"
+			SETEVAL &coolant = "M08"
+		CASE "Titanium"
+			SETEVAL &coolant = "M08"
+		CASE "Ceramic"
+			SETEVAL &coolant = "M08"
+		CASE "Alumine"
+			SETEVAL &coolant = "M08"
+		CASE "Nanocomposite"
+			SETEVAL &coolant = "M08"
+		CASE "Glass Ceramic"
+			SETEVAL &coolant = "M08"
+		NOCASE
+			SETEVAL &coolant = "M12"
+	ENDSWITCH
+#
+SETEVAL $COOLANT = &coolant
+#
+######################################
+### TOOL MAGAZINE ####################
+######################################
+#
+	SWITCH &WNCD_STK_MATERIAL
+		CASE "Zirconia"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Wax"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Plastic"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Peek"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Gold"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Cobalt Chrome"
+		ORCASE "CrCo"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Titanium"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Ceramic"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Alumine"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Nanocomposite"
+			SETEVAL $TOOL_MAGAZINE = 1
+		CASE "Glass Ceramic"
+			SETEVAL $TOOL_MAGAZINE = 1
+		NOCASE
+			SETEVAL $TOOL_MAGAZINE = !!! Tool magazine is not defined !!!
+	ENDSWITCH
+#
+######################################
+### TOOL MAGAZINE ####################
+######################################
+#
