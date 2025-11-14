@@ -1,19 +1,64 @@
 IF &NUMERO
 ELSE
- SET &NUMERO = $NUMERO
+  SET &NUMERO = $NUMERO
 ENDIF
+#
 SET &OUTIL_COURANT = &NUMERO
-IF &NUMERO
+#
+# Aktueller Bahnmittelpunkt-Radius und Werkzeugradius einlesen
+SETOPER &CENTER_RADIUS = $TILDE_33
+SETOPER &TOOL_RADIUS = $TILDE_R
+SETOPER &TOOL_CRAD = &TP_CRAD       # Eckenradius des Werkzeugs
+SETEVAL &RATION = 8888   
+#
+# Effektiver Schneidradius (Fräserradius - Eckenradius)
+SETOPER &CUT_RADIUS = &TOOL_RADIUS - &TOOL_CRAD
+#
+# Innen- oder Außenkontur automatisch erkennen
+IF &CENTER_RADIUS > &TOOL_RADIUS
+# Außenkontur -> Werkzeugradius addieren
+  SETOPER &CONTACT_RADIUS = &CENTER_RADIUS + &TOOL_RADIUS
 ELSE
- SET &NUMERO = $NUMERO
+# Innenkontur -> Werkzeugradius subtrahieren
+  SETOPER &CONTACT_RADIUS = &CENTER_RADIUS - &TOOL_RADIUS
 ENDIF
-SET &OUTIL_COURANT = &NUMERO
-SETOPER &FACTOR = $TILDE_33 / $TILDE_R
-IF &FACTOR < 1.0
-SETOPER &MY_CUTFEEDRATE = 0.75 * &FACTOR * &TP_CUT_FEEDRATE
+#
+# Korrektur für konstante Umfangsgeschwindigkeit
+SETOPER &FACTOR_RADIUS = &CONTACT_RADIUS / &CENTER_RADIUS
+#
+# Seitliche Zustellung (ae) aus CAM übernehmen
+SETOPER &AE = &TP_STEPOVER
+# Eingriffswinkel nur berechnen, wenn effektiver Schneidradius > 0
+IF &CUT_RADIUS > 0.0
+# Verhältnis berechnen
+SETOPER &RATIO = ( &CUT_RADIUS - &AE ) / &CUT_RADIUS
+# Begrenzen auf [-1, 1], um ACOS-Fehler zu vermeiden
+IF &RATIO > 1.0
+	SETOPER &RATIO = 1.0
+ENDIF
+IF &RATIO < -1.0
+	SETOPER &RATIO = -1.0
+ENDIF
+&RATIO
+# Eingriffswinkel berechnen
+SETOPER &PHI = 2 * ACOS(&RATIO)
 ELSE
-SETOPER &MY_CUTFEEDRATE = &TP_CUT_FEEDRATE
+# Wenn CUT_RADIUS = 0 -> Vollnut annehmen (π)
+SETOPER &PHI = 3.14159
 ENDIF
-~h~i I~"37" J~"38" F&MY_CUTFEEDRATE/.0/
-F&TP_CUT_FEEDRATE/.0/
-
+# Referenz-Eingriffswinkel für Vollnut (180°)
+SETOPER &PHI_NOM = 3.14159
+# Chip-Thinning-Faktor
+SETOPER &CHIP_FACTOR = SIN(&PHI_NOM / 2) / SIN(&PHI / 2)
+# Gesamter Vorschubfaktor = Radius-Korrektur * Chip-Thinning
+SETOPER &FACTOR_TOTAL = &FACTOR_RADIUS * &CHIP_FACTOR
+# Angepassten Vorschub berechnen
+SETOPER &MY_CUTFEEDRATE = &TP_CUT_FEEDRATE * &FACTOR_TOTAL
+# Negativen Vorschub spiegeln, damit immer positiv
+IF &MY_CUTFEEDRATE < 0.0
+	SETOPER &MY_CUTFEEDRATE = - &MY_CUTFEEDRATE
+ENDIF
+# Bewegung mit optimiertem Vorschub ausführen
+ ~"40" ~h~i I~"37" J~"38" F&MY_CUTFEEDRATE/.0/
+# Vorschub wieder auf nominal zurücksetzen
+ F&TP_CUT_FEEDRATE/.0/
