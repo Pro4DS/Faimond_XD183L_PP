@@ -17,21 +17,30 @@ INCLUDE = $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_settings.pro4
 ### Save Variables for next Toolpaths
 ################################################
 SETEVAL $OLDTOOL = &TP_CPPNUM 
-SETOPER &UEBERTRAG = $WINKELA + $WINKELC
+SETOPER &UEBERTRAG = $WINKELA + $WINKELB
 SETEVAL $CONTROLANGLE = &UEBERTRAG
 SETEVAL $OLDANGLE_A = $WINKELA
-SETEVAL $OLDANGLE_C = $WINKELC 
+SETEVAL $OLDANGLE_B = $WINKELB 
 ################################################
- ( --------------------------- )
- ( END TOOLPATH &TP_NUM )
- ( --------------------------- )
+ \\ ( --------------------------- )
+ \\ ( END TOOLPATH &TP_NUM )
+ \\ ( --------------------------- )
 #
- (--- Activate Machine Origin ---)
- $ORIGIN_MACHINE
+IF $RTCP == "1" 
+ \\ (--- RTCP OFF ---)
+ $RTCP_OFF
+ENDIF
 #
- (--- TOOL COMPENSATION OFF ---)
- D0
+IF $WP_ALIGN == "1"
+ \\ (--- WP-Alignment OFF ---)
+ $WP_ALIGN_OFF
+ENDIF
 #
- (--- Move EndPos_Z ---)
- G00 Z$Safe_Z
+IF $DYNAMIC == "1"
+ \\ (--- DYNAMIC OFF ---)
+ $DYNAMIC_OFF
+ENDIF
+#
+ \\ (--- Move SafePos_Z ---)
+ G00 $Safe_Z
 #

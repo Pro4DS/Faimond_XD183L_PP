@@ -19,8 +19,8 @@ INCLUDE = $WNCZONE\WNCD_VARS.txt
 ##################################################
 ##### MACHINE HAS A LOADER 
 ##################################################
-#  0= No Loader      1=with Loader    2=Pallet managed in JobManager
-SETEVAL $MACHINE_WITH_LOADER = 2
+#  0= No Loader      1=with Loader    
+SETEVAL $MACHINE_WITH_LOADER = 0
 #
 ##################################################
 ###### SAFE POSITIONS 
@@ -28,11 +28,11 @@ SETEVAL $MACHINE_WITH_LOADER = 2
 # IMPORTANT
 # Before SafePos must be always the Machine Origin activated 
 #
-SETEVAL $SAFE_X = "35"
-SETEVAL $SAFE_Y = "65"
-SETEVAL $SAFE_Z = "0"
-SETEVAL $SAFE_A = "0"
-SETEVAL $SAFE_B = "0"
+SETEVAL $SAFE_X = "X0"
+SETEVAL $SAFE_Y = "Y0"
+SETEVAL $SAFE_Z = "Z80"
+SETEVAL $SAFE_A = "A0"
+SETEVAL $SAFE_B = "B0"
 ##################################################
 ##### HOME POSITION
 ##################################################
@@ -44,8 +44,77 @@ SETEVAL $HOME_B = "not used"
 ##################################################
 ##### ORIGINS - G53, G54,...
 ##################################################
-SETEVAL $ORIGIN_MACHINE = "G90 G53"
-SETEVAL $ORIGIN_DISC = "G90 G54"
+#
+SETEVAL $ORIGIN_MACHINE = "G54"
+#
+SETEVAL $ORIGIN_DISC = "G54"
+#
+##################################################
+#### RTCP COMMANDS
+##################################################
+#
+# Define isf the machine as RTCP or not
+#   0 = No RTCP on machine  1 = RTCP on MACHINE
+# 
+SETEVAL $RTCP = "1"
+#
+#  command for RTCP ON
+#
+SETEVAL $RTCP_ON = "G151 T1 EA0 EB0 EC0 EU0 EV0 EW0"
+#
+#  command for RTCP OFF
+#
+SETEVAL $RTCP_OFF = "G151 S0"
+#
+##################################################
+#### WORKPIECE ALIGNMENT
+##################################################
+#
+# Define if the 3D Workpiece Alignment command is needed
+#   0 = Not needed  1 = add workpiece aligment
+# 
+SETEVAL $WP_ALIGN = "1"
+#
+#  command for worpiece alignmet ON
+#
+SETEVAL $WP_ALIGN_ON = "G34"
+#
+#  command for worpiece alignmet OFF
+#
+SETEVAL $WP_ALIGN_OFF = "G30"
+#
+##################################################
+#### DYNAMIC SETTINGS 
+##################################################
+#
+# If the machine can handle different Dynamic-Settings
+# activate it here to add the command to the NC File.
+#   0 = deactivated   1 = activated
+#Parameter:
+# ET  -1 = Zurücksetzen   0 = Schnelle Bearbeitung, ideal zum Schruppen   1 = Präzise, ideal zum Schlichten
+# optional:
+# ER   Toleranz - Zulässige Profiltoleranz in Millimetern
+# EC   Sehnenfehler
+# EL   Segmentlänge
+# EF   Filter zum glätten der Oberflächen
+#
+SETEVAL $DYNAMIC = "0"
+#
+#  command for fast DYNAMIC (i.e. Roughing)
+#
+SETEVAL $DYNAMIC_RGH = "G732 ET0"
+#SETEVAL $DYNAMIC_RGH = "G732 ET0"
+SET $DYNAMIC_FACTOR_RGH = 2.0
+#
+#  command for fast DYNAMIC (i.e. Finishing)
+#
+SETEVAL $DYNAMIC_FIN = "G732 ET0"
+SET $DYNAMIC_FACTOR_FIN = 1.0
+#
+#  command for dynamic OFF
+#
+SETEVAL $DYNAMIC_OFF = "G732 ET-1"
+#
 ##################################################
 ######    FEED MANAGEMENT    #####################
 ##################################################
@@ -88,13 +157,13 @@ SETEVAL $FRAP = &FRAP/.0/
 ###############################################
 #
 # switch cooolant mode by material
-# M12 = Air
-# M08 = Water 
-# M16 = Air + Suction
+# M07 = Air
+# M08 = Coolant 
+# M09 = Air + Coolant OFF
 #
 	SWITCH &WNCD_STK_MATERIAL
 		CASE "Zirconia"
-			SETEVAL &coolant = "M16"
+			SETEVAL &coolant = "M07"
 		CASE "Wax"
 			SETEVAL &coolant = "M08"
 		CASE "Plastic"
@@ -117,7 +186,7 @@ SETEVAL $FRAP = &FRAP/.0/
 		CASE "Glass Ceramic"
 			SETEVAL &coolant = "M08"
 		NOCASE
-			SETEVAL &coolant = "M12"
+			SETEVAL &coolant = "M08"
 	ENDSWITCH
 #
 SETEVAL $COOLANT = &coolant

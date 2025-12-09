@@ -59,6 +59,7 @@ IF &MY_CUTFEEDRATE < 0.0
 	SETOPER &MY_CUTFEEDRATE = - &MY_CUTFEEDRATE
 ENDIF
 # Bewegung mit optimiertem Vorschub ausführen
- ~"40" ~h~i I~"37" J~"38" F&MY_CUTFEEDRATE/.0/
+ ~"40" ~h~i I~"37" J~"38" F&TP_CUT_FEEDRATE/.0/ * &FACTOR_TOTAL
 # Vorschub wieder auf nominal zurücksetzen
- F&TP_CUT_FEEDRATE/.0/
+ F&TP_CUT_FEEDRATE/.0/ 
+ F FAC  &FACTOR_TOTAL
