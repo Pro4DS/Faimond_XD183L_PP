@@ -18,7 +18,7 @@
 0 M30                 : Stopkennung: 0=nein,1=ja
 1 °G00 30000          : Eilgang: 1=erster Satz im Vorschub,2=im Eilgang
 1 °G01                : Vorschubgeschwindigkeit: 2=F.. nur im ersten Satz
-0                     : Referenz: 0=Mittelp,1=Umfang
+1                     : Referenz: 0=Mittelp,1=Umfang
 0                     : Zahl der Zeilen zur freien Verfuegg (max 20x75)
 1 .xpi                : Extension des Fraesprogramms: 0='.blc'
 0 *                   : Zeilenendekennung: 0=nein,1=ja
@@ -72,5 +72,6 @@ X[~"76"+[~"91.1"*#800]]Y[~"77"+[~"91.2"*#800]]Z[~"78"+[~"91.3"*#801]]
 #1104 $WNCPOSPRO\PRO4-FAIMOND-XD183\PRO4-FAIMOND-XD183_fc.pro4 2
 
 @PRO4 DENTAL GmbH
+
 
 
